@@ -26,7 +26,15 @@
     <div class="q-pa-md row items-start q-gutter-md">
       <div v-for="(product, index) in displayedProducts" :key="index">
         <q-card class="my-card" v-ripple>
-          <img :src="product.productImage" fit="contain" />
+          <q-img src="product.productImage" :fit="'contain'">
+            <template v-slot:error>
+              <div
+                class="absolute-full flex flex-center bg-negative text-white"
+              >
+                Cannot load image
+              </div>
+            </template>
+          </q-img>
           <q-card-section>
             <div class="text-h7 h7">{{ product.productName }}</div>
             <div class="text-subtitle-2">{{ product.price }}</div>
@@ -79,7 +87,6 @@ export default defineComponent({
 
   watch: {
     selectedProductType: function (val) {
-      console.log(" filter val == " + val);
       if (val !== "") {
         this.displayedProducts = this.products.filter(
           (product) => product.type === val
