@@ -1,38 +1,38 @@
 <template>
-  <div align-items="right" class="col-9">
-    <q-toolbar class="bg-grey-3">
-      <div class="row">
-        <q-select
-          v-model="selectedProductType"
-          :options="optionsProductTypes"
-          behavior="menu"
-          label="Filter"
-          use-input
-
-        >
-          <template v-slot:no-option>
-            <q-item>
-              <q-item-section class="text-grey">
-                Product not found
-              </q-item-section>
-            </q-item>
-          </template>
-        </q-select>
-      </div>
-    </q-toolbar>
-
-    <div class="row">
-      <div v-for="(product, index) in displayedProducts" :key="index">
-        <div class="col-4">
-          <q-badge v-if="product.isSale" color="red">Sale</q-badge>
-          <q-card class="my-card" v-ripple>
-            <img :src="product.productImage" fit="contain" />
-            <q-card-section>
-              <div class="text-h6">{{ product.productName }}</div>
-              <div class="text-subtitle-2">{{ product.price }}</div>
-            </q-card-section>
-          </q-card>
+  <div class="container">
+    <div class="col-12">
+      <q-toolbar class="bg-grey-3">
+        <div class="row fit justify-end">
+          <q-select
+            v-model="selectedProductType"
+            :options="optionsProductTypes"
+            behavior="menu"
+            label="Filter"
+            use-input
+            clearable
+          >
+            <template v-slot:no-option>
+              <q-item>
+                <q-item-section class="text-grey">
+                  Product not found
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
         </div>
+      </q-toolbar>
+    </div>
+
+    <div class="q-pa-md row items-start q-gutter-md">
+      <div v-for="(product, index) in displayedProducts" :key="index">
+        <q-card class="my-card" v-ripple>
+          <img :src="product.productImage" fit="contain" />
+          <q-card-section>
+            <div class="text-h7 h7">{{ product.productName }}</div>
+            <div class="text-subtitle-2">{{ product.price }}</div>
+          </q-card-section>
+          <q-badge v-if="product.isSale" color="red" floating>Sale</q-badge>
+        </q-card>
       </div>
     </div>
   </div>
@@ -40,6 +40,7 @@
 
 <script>
 import { defineComponent } from "vue";
+import axios from "axios";
 
 export default defineComponent({
   name: "PageIndex",
@@ -56,73 +57,16 @@ export default defineComponent({
     };
   },
   methods: {
-    loadProducts() {
-      this.products = [
-        {
-          index: 0,
-          isSale: false,
-          price: "$49.99",
-          productImage: "Product_1.jpeg",
-          productName: "Pure Blonde Crate",
-          type: "Beer",
-        },
-        {
-          index: 1,
-          isSale: true,
-          price: "$14.99",
-          productImage: "Product_2.jpeg",
-          productName: "Victoria Bitter 4x6x375ml",
-          type: "Beer",
-        },
-        {
-          index: 2,
-          isSale: false,
-          price: "$24.99",
-          productImage: "Product_3.jpeg",
-          productName: "Kirin Megumi 4x6x330ml",
-          type: "Beer",
-        },
-        {
-          index: 3,
-          isSale: true,
-          price: "$4.99",
-          productImage: "Product_4.jpeg",
-          productName: "Panhead CH Johnny Octane Can",
-          type: "Beer",
-        },
-        {
-          index: 4,
-          isSale: false,
-          price: "$25.99",
-          productImage: "Product_5.jpeg",
-          productName: "Aquila Spark SauvB Bottle",
-          type: "Wine",
-        },
-        {
-          index: 5,
-          isSale: true,
-          price: "$29.99",
-          productImage: "Product_6.jpeg",
-          productName: "Bernadino Spumante Bottle",
-          type: "Wine",
-        },
-        {
-          index: 6,
-          isSale: true,
-          price: "$69.99",
-          productImage: "Product_7.jpeg",
-          productName: "Grey Goose Orginal 10x12x50ml",
-          type: "Spirits",
-        },
-        {
-          index: 7,
-          isSale: false,
-          price: "$49.99",
-          productImage: "Product_8.jpeg",
-          productName: "Scrumpy RBerry 6x1.25L",
-          type: "Cider",
-        },
-      ];
+    async loadProducts() {
+      try {
+        const localApiServer = "http://localhost:3000";
+
+        const apiResponse = await axios.get(localApiServer + "/products");
+
+        this.products = apiResponse.data;
+      } catch (apiResponseError) {
+        console.log("apiResponseError ", JSON.stringify(apiResponseError));
+      }
 
       const types = this.products.map((product) => product.type);
 
@@ -135,16 +79,25 @@ export default defineComponent({
 
   watch: {
     selectedProductType: function (val) {
+      console.log(" filter val == " + val);
       if (val !== "") {
         this.displayedProducts = this.products.filter(
           (product) => product.type === val
         );
       }
 
-      if (val === "All") {
+      if (val === "All" || val === null) {
         this.displayedProducts = this.products;
       }
     },
   },
 });
 </script>
+
+
+
+<style lang="sass" scoped>
+.my-card
+  width: 100%
+  max-width: 250px
+</style>
